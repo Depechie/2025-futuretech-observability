@@ -10,4 +10,8 @@
     <ProjectReference Include="..\futuretech.ServiceDefaults\futuretech.ServiceDefaults.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" Version="9.1.0" />
+  </ItemGroup>
+
 </Project>

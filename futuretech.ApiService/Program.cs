@@ -1,7 +1,14 @@
+using System.Text;
+using System.Text.Json;
+using Microsoft.Extensions.Caching.Distributed;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
+
+// Add REDIS distributed cache.
+builder.AddRedisDistributedCache("cache");
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
@@ -21,9 +28,14 @@ if (app.Environment.IsDevelopment())
 
 string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
 
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/weatherforecast", async (IDistributedCache cache) =>
 {
-    var forecast = Enumerable.Range(1, 5).Select(index =>
+    var cachedForecast = await cache.GetAsync("forecast");
+
+    if (cachedForecast is null)
+    {
+        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
+        var forecast = Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast
         (
             DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
@@ -31,7 +43,16 @@ app.MapGet("/weatherforecast", () =>
             summaries[Random.Shared.Next(summaries.Length)]
         ))
         .ToArray();
-    return forecast;
+
+        await cache.SetAsync("forecast", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(forecast)), new ()
+        {
+            AbsoluteExpiration = DateTime.Now.AddSeconds(15)
+        });
+
+        return forecast;
+    }
+
+    return JsonSerializer.Deserialize<IEnumerable<WeatherForecast>>(cachedForecast);
 })
 .WithName("GetWeatherForecast");
 
