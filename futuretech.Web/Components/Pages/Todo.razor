@@ -1,0 +1,46 @@
+﻿@page "/todo"
+@attribute [StreamRendering(true)]
+
+@inject TodoApiClient TodoApi
+
+<PageTitle>Todo</PageTitle>
+
+<h1>Todo</h1>
+
+<p>This component demonstrates showing data loaded from a backend API service.</p>
+
+@if (todos == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Title</th>
+                <th>Is Completed</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var todo in todos)
+            {
+                <tr>
+                    <td>@todo.Id</td>
+                    <td>@todo.Title</td>
+                    <td>@todo.IsCompleted</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private TodoItem[]? todos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        todos = await TodoApi.GetAllTodosAsync();
+    }
+}
