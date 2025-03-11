@@ -1,6 +1,8 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
+using futuretech.ApiService;
+using futuretech.ApiService.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,12 @@ builder.AddServiceDefaults();
 
 // Add REDIS distributed cache.
 builder.AddRedisDistributedCache("cache");
+
+// Add RabbitMQ client.
+builder.AddRabbitMQClient("messaging", configureConnectionFactory: (connectionFactory) =>
+{
+    connectionFactory.ClientProvidedName = "app:event-producer";
+});
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
@@ -28,39 +36,7 @@ if (app.Environment.IsDevelopment())
 
 string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
 
-app.MapGet("/weatherforecast", async (IDistributedCache cache) =>
-{
-    var cachedForecast = await cache.GetAsync("forecast");
-
-    if (cachedForecast is null)
-    {
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-
-        await cache.SetAsync("forecast", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(forecast)), new ()
-        {
-            AbsoluteExpiration = DateTime.Now.AddSeconds(15)
-        });
-
-        return forecast;
-    }
-
-    return JsonSerializer.Deserialize<IEnumerable<WeatherForecast>>(cachedForecast);
-})
-.WithName("GetWeatherForecast");
-
+app.MapEndpoints();
 app.MapDefaultEndpoints();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

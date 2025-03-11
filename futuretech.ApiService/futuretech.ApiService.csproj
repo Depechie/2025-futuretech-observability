@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.RabbitMQ.Client.v7" Version="9.1.0" />
     <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.2" />
   </ItemGroup>
