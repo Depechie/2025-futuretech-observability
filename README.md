@@ -11,6 +11,7 @@
 ## Init Aspire project
 
 ```
+dotnet new install Aspire.ProjectTemplates
 dotnet new aspire-starter --name futuretech
 dotnet new aspire-starter --output futuretech
 ```
