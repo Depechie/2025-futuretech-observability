@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../futuretech.WorkerService/futuretech.WorkerService.csproj" />
     <ProjectReference Include="..\futuretech.ApiService\futuretech.ApiService.csproj" />
     <ProjectReference Include="..\futuretech.Web\futuretech.Web.csproj" />
   </ItemGroup>
@@ -19,6 +20,7 @@
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="9.2.1" />
     <PackageReference Include="Aspire.Hosting.Redis" Version="9.2.1" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="9.2.1" />
   </ItemGroup>
 
 </Project>
