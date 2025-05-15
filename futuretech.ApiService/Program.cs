@@ -1,13 +1,13 @@
-using System.Text;
-using System.Text.Json;
-using Microsoft.Extensions.Caching.Distributed;
 using futuretech.ApiService;
 using futuretech.ApiService.Extensions;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
+
+builder.AddNpgsqlDataSource("Todos");
 
 // Add REDIS distributed cache.
 builder.AddRedisDistributedCache("cache");
@@ -25,6 +25,13 @@ builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+// Initialize database
+using (var scope = app.Services.CreateScope())
+{
+    var connectionString = scope.ServiceProvider.GetRequiredService<NpgsqlConnection>().ConnectionString;
+    DatabaseInitializer.Initialize(connectionString, "user", "password");
+}
 
 // Configure the HTTP request pipeline.
 app.UseExceptionHandler();

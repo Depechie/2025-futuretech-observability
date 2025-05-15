@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using Dapper;
 using Microsoft.Extensions.Caching.Distributed;
+using Npgsql;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
 using RabbitMQ.Client;
@@ -16,8 +18,33 @@ public static class EndpointExtensions
     public static IEndpointRouteBuilder MapEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapGet("/weatherforecast", GetWeatherforecast).WithName("GetWeatherForecast");
+        app.MapGet("/todos", GetTodos).WithName("GetTodos");
+        app.MapGet("/todos/{id}", GetTodo).WithName("GetTodo");
 
         return app;
+    }
+
+    private static async Task<IResult> GetTodo(int id, NpgsqlConnection db)
+    {
+        const string sql = """
+            SELECT Id, Title, IsComplete
+            FROM Todos
+            WHERE Id = @id
+            """;
+        
+        return await db.QueryFirstOrDefaultAsync<Todo>(sql, new { id }) is { } todo
+            ? Results.Ok(todo)
+            : Results.NotFound();
+    }
+
+    private static async Task<IEnumerable<Todo>> GetTodos(NpgsqlConnection db)
+    {
+        const string sql = """
+            SELECT Id, Title, IsComplete
+            FROM Todos
+            """;
+
+        return await db.QueryAsync<Todo>(sql);
     }
 
     private static async Task<IEnumerable<WeatherForecast>> GetWeatherforecast(IDistributedCache cache, IConnection messageConnection)
@@ -97,3 +124,5 @@ public record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
+
+public record Todo(int Id, string Title, bool IsComplete);
