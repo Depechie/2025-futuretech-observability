@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
+    <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.2.1" />
   </ItemGroup>
 
 </Project>
