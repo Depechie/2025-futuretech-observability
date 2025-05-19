@@ -15,7 +15,6 @@
     <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.2.1" />
     <PackageReference Include="Aspire.RabbitMQ.Client.v7" Version="9.2.1" />
     <PackageReference Include="Aspire.Npgsql" Version="9.2.1" />
-    <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.1.0" />
     <PackageReference Include="Dapper" Version="2.1.66" />
   </ItemGroup>
 
